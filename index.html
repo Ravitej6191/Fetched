@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fetched! — Search and stream movies, series and anime." />
+  <meta name="theme-color" content="#e63950" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Fetched!" />
+  <title>Fetched!</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e63950'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='38' font-weight='bold' fill='%23fff'%3EF%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="Assets/Images/icon.svg" />
+  <link rel="manifest" href="manifest.json" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js" type="module"></script>
+</head>
+<body>
+
+<!-- ── Disclaimer Modal ── -->
+<div class="modal-overlay" id="disclaimerModal" role="dialog" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerText" aria-modal="true" hidden>
+  <div class="modal-content bento">
+    <button class="modal-close" id="modalClose" aria-label="Close disclaimer">×</button>
+    <h2 id="disclaimerTitle" class="modal-title">Heads up</h2>
+    <p id="disclaimerText" class="modal-text">Fetched! is a fan-made entertainment tool. We don't host, own, or distribute any of the content shown — all titles and streams belong to their respective owners. Nothing here is intended to infringe any rights.</p>
+    <button id="disclaimerBtn" class="modal-btn">Got it, let's go</button>
+  </div>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <a class="nav-logo" href="#" aria-label="Fetched home">Fetched<span>!</span></a>
+
+  <div class="nav-search-wrap">
+    <label for="searchInput" class="sr-only">Search movies, series, anime</label>
+    <span class="search-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input
+      type="search"
+      id="searchInput"
+      class="nav-search-input"
+      placeholder="Search movies, series, anime…"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="100"
+    />
+    <button class="search-clear" id="searchClear" aria-label="Clear search" hidden>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-icon-btn" id="themeToggle" aria-label="Switch to light mode" title="Toggle theme"></button>
+  </div>
+</nav>
+
+<!-- ── Sidebar backdrop (mobile) ── -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+<!-- ── App Layout ── -->
+<div class="app-layout" id="appLayout">
+
+  <!-- ── Sidebar (bento stack) ── -->
+  <aside class="sidebar" id="sidebar" inert aria-label="Filters, watchlist and history">
+
+    <!-- Filters -->
+    <section class="bento bento-filters">
+      <header class="bento-head">
+        <span class="bento-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        </span>
+        <h3 class="bento-title">Filters</h3>
+        <button class="bento-action" id="filterResetBtn" hidden>Reset</button>
+      </header>
+      <div class="bento-body">
+        <div class="filter-pills" id="typePills" role="group" aria-label="Filter by type">
+          <button class="filter-pill active" data-type="all">All</button>
+          <button class="filter-pill" data-type="movie">Movies</button>
+          <button class="filter-pill" data-type="series">Series</button>
+        </div>
+        <div class="filter-year-row">
+          <label class="filter-year-label">
+            <span>From</span>
+            <input type="number" id="yearFrom" class="filter-year-input" placeholder="1900" min="1900" max="2099" />
+          </label>
+          <span class="filter-year-sep" aria-hidden="true">–</span>
+          <label class="filter-year-label">
+            <span>To</span>
+            <input type="number" id="yearTo" class="filter-year-input" placeholder="2099" min="1900" max="2099" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Searches -->
+    <section class="bento bento-recent">
+      <header class="bento-head">
+        <span class="bento-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <h3 class="bento-title">Recent</h3>
+        <button class="bento-action" id="recentClearBtn">Clear</button>
+      </header>
+      <ul class="bento-list" id="recentList" role="list"></ul>
+    </section>
+
+    <!-- Watchlist -->
+    <section class="bento bento-watchlist">
+      <header class="bento-head">
+        <span class="bento-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M5 3h14a1 1 0 0 1 1 1v17l-7-3-7 3V4a1 1 0 0 1 1-1z"/></svg>
+        </span>
+        <h3 class="bento-title">Watchlist</h3>
+        <button class="bento-action" id="watchlistClearBtn">Clear</button>
+      </header>
+      <ul class="bento-list" id="watchlistList" role="list"></ul>
+    </section>
+
+    <!-- History -->
+    <section class="bento bento-history">
+      <header class="bento-head">
+        <span class="bento-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </span>
+        <h3 class="bento-title">History</h3>
+        <button class="bento-action" id="historyClearBtn">Clear</button>
+      </header>
+      <ul class="bento-list" id="historyList" role="list"></ul>
+    </section>
+
+  </aside>
+
+  <!-- ── Main column ── -->
+  <div class="main-column">
+    <main class="main" id="main">
+
+      <!-- Empty state — hero bento -->
+      <div class="bento bento-hero" id="emptyState">
+        <div class="hero-lottie-wrap">
+          <dotlottie-wc
+            src="https://lottie.host/7a573522-49ca-4fcc-84d2-469543773f31/7daNsaXIAN.lottie"
+            class="hero-lottie"
+            autoplay
+            loop
+            aria-hidden="true"
+          ></dotlottie-wc>
+        </div>
+        <h1 class="hero-title">What would you like to watch?</h1>
+        <p class="hero-sub">Search above&ensp;·&ensp;Press <kbd>/</kbd> to focus&ensp;·&ensp;Click a poster to play</p>
+        <div class="hero-chips" aria-label="Quick search suggestions">
+          <button class="hero-chip" data-q="Inception">Inception</button>
+          <button class="hero-chip" data-q="Breaking Bad">Breaking Bad</button>
+          <button class="hero-chip" data-q="Attack on Titan">Attack on Titan</button>
+          <button class="hero-chip" data-q="Interstellar">Interstellar</button>
+          <button class="hero-chip" data-q="The Office">The Office</button>
+          <button class="hero-chip" data-q="Oppenheimer">Oppenheimer</button>
+        </div>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div class="skeleton-wrap" id="skeletonWrap" hidden aria-busy="true" aria-label="Loading results">
+        <div class="skeleton-grid">
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- Results — bento container -->
+      <section class="bento bento-results" id="resultsContainer" hidden aria-label="Search results" aria-live="polite">
+        <header class="results-head">
+          <h2 class="results-title">Results</h2>
+          <span class="results-count" id="resultsCount"></span>
+        </header>
+        <div class="results-grid" id="resultsGrid" role="list"></div>
+        <div class="load-more-wrap" id="loadMoreWrap" hidden>
+          <span class="load-more-count" id="loadMoreCount"></span>
+          <button class="btn-load-more" id="loadMoreBtn">Load More</button>
+        </div>
+      </section>
+
+      <!-- No results / Error — bento empties -->
+      <div class="bento bento-empty" id="noResultsMsg" hidden role="status">
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <p class="empty-heading">No results found</p>
+        <p class="empty-text">Try a different title or tweak your filters.</p>
+      </div>
+      <div class="bento bento-empty bento-error" id="errorMsg" hidden role="alert">
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <p class="empty-heading">Something went wrong</p>
+        <p class="empty-text">Please check your connection and try again.</p>
+      </div>
+
+    </main>
+  </div>
+
+</div>
+
+<!-- Scroll to top -->
+<button class="scroll-top-btn" id="scrollTopBtn" aria-label="Back to top" hidden>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<!-- Screen-reader live region -->
+<div id="srAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
