@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="Fetched! — Search and stream movies, series and anime." />
   <meta name="theme-color" content="#e63950" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -10,17 +10,37 @@
   <meta name="apple-mobile-web-app-title" content="Fetched!" />
   <title>Fetched!</title>
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e63950'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='38' font-weight='bold' fill='%23fff'%3EF%3C/text%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="Assets/Images/icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="Assets/Images/favicon-32.png?v=2" />
+  <link rel="icon" type="image/png" sizes="192x192" href="Assets/Images/icon-192.png?v=2" />
+  <link rel="apple-touch-icon" href="Assets/Images/apple-touch-icon.png?v=2" />
   <link rel="manifest" href="manifest.json" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+  <!-- Non-blocking font load — avoids render-blocking on cold start -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" />
+  </noscript>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js" type="module"></script>
 </head>
 <body>
+
+<!-- ── Offline indicator ── -->
+<div class="offline-bar" id="offlineBar" role="status" aria-live="polite" aria-atomic="true" hidden>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="1" y1="1" x2="23" y2="23"/>
+    <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+    <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+    <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+    <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+    <line x1="12" y1="20" x2="12.01" y2="20"/>
+  </svg>
+  No internet connection
+</div>
 
 <!-- ── Disclaimer Modal ── -->
 <div class="modal-overlay" id="disclaimerModal" role="dialog" aria-labelledby="disclaimerTitle" aria-describedby="disclaimerText" aria-modal="true" hidden>
@@ -56,6 +76,11 @@
   </div>
 
   <div class="nav-right">
+    <button class="nav-icon-btn" id="sidebarToggle" aria-label="Open filters and history" aria-expanded="false" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <button class="nav-icon-btn" id="themeToggle" aria-label="Switch to light mode" title="Toggle theme"></button>
   </div>
 </nav>
@@ -142,17 +167,13 @@
 
       <!-- Empty state — hero bento -->
       <div class="bento bento-hero" id="emptyState">
-        <div class="hero-lottie-wrap">
-          <dotlottie-wc
-            src="https://lottie.host/7a573522-49ca-4fcc-84d2-469543773f31/7daNsaXIAN.lottie"
-            class="hero-lottie"
-            autoplay
-            loop
-            aria-hidden="true"
-          ></dotlottie-wc>
+        <div class="hero-art-wrap">
+          <div class="hero-ghost-anim">
+            <img class="hg-ghost" src="Assets/Images/icon-512.png?v=2" alt="Fetched! mascot: a ghost holding a lantern" width="512" height="512" decoding="async" />
+          </div>
         </div>
         <h1 class="hero-title">What would you like to watch?</h1>
-        <p class="hero-sub">Search above&ensp;·&ensp;Press <kbd>/</kbd> to focus&ensp;·&ensp;Click a poster to play</p>
+        <p class="hero-sub">Search above&ensp;·&ensp;Press <kbd>/</kbd> to focus&ensp;·&ensp;Click a poster for details&ensp;·&ensp;Hover and press <span class="hero-sub-arrow" aria-hidden="true">▶</span> to play</p>
         <div class="hero-chips" aria-label="Quick search suggestions">
           <button class="hero-chip" data-q="Inception">Inception</button>
           <button class="hero-chip" data-q="Breaking Bad">Breaking Bad</button>
@@ -160,6 +181,28 @@
           <button class="hero-chip" data-q="Interstellar">Interstellar</button>
           <button class="hero-chip" data-q="The Office">The Office</button>
           <button class="hero-chip" data-q="Oppenheimer">Oppenheimer</button>
+        </div>
+      </div>
+
+      <!-- Home rails: continue watching, popular, anime -->
+      <div class="home-rows" id="homeRows">
+        <section class="home-row" id="continueRow" hidden aria-labelledby="continueTitle">
+          <h2 class="home-row-title" id="continueTitle">Continue watching</h2>
+          <div class="rail" id="continueRail" role="list"></div>
+        </section>
+        <section class="home-row" id="popularRow" aria-labelledby="popularTitle">
+          <h2 class="home-row-title" id="popularTitle">Popular picks</h2>
+          <div class="rail" id="popularRail" role="list"><p class="rail-note">Loading…</p></div>
+        </section>
+        <section class="home-row" id="animeRow" aria-labelledby="animeTitle">
+          <h2 class="home-row-title" id="animeTitle">Anime picks</h2>
+          <div class="rail" id="animeRail" role="list"><p class="rail-note">Loading…</p></div>
+        </section>
+        <div class="home-tools">
+          <span>Backup your lists</span>
+          <button class="home-tool-btn" id="exportBtn" type="button">Export</button>
+          <button class="home-tool-btn" id="importBtn" type="button">Import</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden />
         </div>
       </div>
 
@@ -217,6 +260,12 @@
     <polyline points="18 15 12 9 6 15"/>
   </svg>
 </button>
+
+<!-- Toast (play feedback, retry actions) -->
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span class="toast-msg" id="toastMsg"></span>
+  <span class="toast-actions" id="toastActions"></span>
+</div>
 
 <!-- Screen-reader live region -->
 <div id="srAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
