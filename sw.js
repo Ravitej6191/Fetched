@@ -3,8 +3,8 @@
    Pages: network-first · other shell files: stale-while-revalidate · API: network only · CDN/posters: capped cache
 ============================================================================= */
 
-const CACHE       = 'fetched-v10';
-const RUNTIME     = 'fetched-runtime-v10';
+const CACHE       = 'fetched-v11';
+const RUNTIME     = 'fetched-runtime-v11';
 const MAX_RUNTIME = 120;  // cap on cached posters/fonts
 
 const PRECACHE = [

@@ -1065,16 +1065,18 @@ async function openDetailModal(item) {
   const imdbRating = data.imdbRating !== 'N/A' ? `⭐ ${escapeHtml(data.imdbRating)}/10` : '—';
   const bookmarked = isInWatchlist(item.imdbID);
 
+  // Compact popup: a few chips, then one line each for genre and cast
+  const known = v => (v && v !== 'N/A' ? v : null);
   const metaItems = [
-    ['Year',     data.Year],
-    ['Rating',   imdbRating],
-    ['Rated',    data.Rated    !== 'N/A' ? data.Rated    : null],
-    ['Runtime',  data.Runtime  !== 'N/A' ? data.Runtime  : null],
-    ['Genre',    data.Genre    !== 'N/A' ? data.Genre    : null],
-    ['Director', data.Director && data.Director !== 'N/A' ? data.Director : null],
-    ['Cast',     data.Actors   !== 'N/A' ? data.Actors   : null],
+    ['Year',    data.Year],
+    ['IMDb',    imdbRating],
+    ['Rated',   known(data.Rated)],
+    ['Runtime', known(data.Runtime)],
     isTV ? ['Seasons', data.totalSeasons || '?'] : null,
   ].filter(Boolean).filter(([, v]) => v);
+  const genre = known(data.Genre);
+  const cast  = known(data.Actors);
+  const award = known(data.Awards);
 
   bodyDiv.innerHTML = `
     <div class="detail-hero">
@@ -1084,8 +1086,10 @@ async function openDetailModal(item) {
         <div class="detail-meta">
           ${metaItems.map(([k, v]) => `<span class="detail-meta-item"><strong>${k}</strong>${escapeHtml(v)}</span>`).join('')}
         </div>
-        ${data.Awards && data.Awards !== 'N/A' ? `<p class="detail-awards">🏆 ${escapeHtml(data.Awards)}</p>` : ''}
-        <p class="detail-plot">${escapeHtml(data.Plot || '')}</p>
+        ${genre ? `<p class="detail-line">${escapeHtml(genre.split(', ').join(' · '))}</p>` : ''}
+        ${cast  ? `<p class="detail-line detail-line--dim" title="${escapeHtml(cast)}"><strong>Cast</strong> ${escapeHtml(cast)}</p>` : ''}
+        ${award ? `<p class="detail-awards" title="${escapeHtml(award)}">🏆 ${escapeHtml(award)}</p>` : ''}
+        <p class="detail-plot" title="${escapeHtml(data.Plot || '')}">${escapeHtml(data.Plot || '')}</p>
         ${isTV ? `
         <div class="detail-episodes">
           <label class="detail-ep-field">Season
